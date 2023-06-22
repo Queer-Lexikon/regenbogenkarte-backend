@@ -12,7 +12,7 @@ class Organisation(models.Model):
     lat = models.FloatField()
     lat_lon_approx = models.BooleanField(null = True)
     activities = models.TextField(blank = True)
-    identites = models.CharField(max_length = 100, blank = True)
+    identities = models.CharField(max_length = 100, blank = True)
     age_restriction = models.CharField(max_length = 100, blank = True)
 
     def __str__(self):
@@ -24,11 +24,11 @@ class Organisation(models.Model):
         data['location'] = {}
         for f in opts.concrete_fields:
             if f.value_from_object(self):
-                if f.name not in {'address', 'lat', 'lon', 'lat_lon_approx'}:
+                if f.name not in {'address', 'lat', 'lon', 'lat_lon_approx', 'id'}:
                     data[f.name] = f.value_from_object(self)
-                elif f.name != 'lat_lon_approx':
+                elif f.name not in {'lat_lon_approx','id'}:
                     data['location'][f.name] = f.value_from_object(self)
-                else:
+                elif f.name != 'id':
                     data['location']['approx'] = f.value_from_object(self)
         return data
 
