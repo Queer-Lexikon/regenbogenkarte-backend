@@ -6,13 +6,13 @@ class Organisation(models.Model):
     name = models.CharField(max_length = 100)
     email = models.EmailField(max_length = 256, blank = True)
     website = models.CharField(max_length = 200, blank = True)
-    phone = models.CharField(max_length = 20, blank = True)
+    phone = models.CharField(max_length = 100, blank = True)
     address = models.CharField(max_length = 100, blank = True)
     lon = models.FloatField()
     lat = models.FloatField()
     lat_lon_approx = models.BooleanField(null = True)
     activities = models.TextField(blank = True)
-    identities = models.CharField(max_length = 100, blank = True)
+    identities = models.CharField(max_length = 500, blank = True)
     age_restriction = models.CharField(max_length = 100, blank = True)
 
     def __str__(self):
