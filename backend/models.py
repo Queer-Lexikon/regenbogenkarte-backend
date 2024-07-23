@@ -1,11 +1,9 @@
 from django.db import models
+from phonenumber_field.modelfields import PhoneNumberField
 
 class Organisation(models.Model):
     state = models.ForeignKey("State", on_delete=models.RESTRICT)
     name = models.CharField(max_length = 100)
-    email = models.EmailField(max_length = 256, blank = True)
-    website = models.CharField(max_length = 200, blank = True)
-    phone = models.CharField(max_length = 100, blank = True)
     address = models.CharField(max_length = 100, blank = True)
     lon = models.FloatField()
     lat = models.FloatField()
@@ -18,6 +16,18 @@ class Organisation(models.Model):
     def country(self):
         return self.state.country
 
+    @property
+    def emails(self):
+        return self.orgemail_set.as_list() 
+
+    @property
+    def phones(self):
+        return self.orgphone_set.as_list() 
+
+    @property
+    def websites(self):
+        return self.orgwebsite_set.as_list() 
+
     def __str__(self):
         return self.name
 
@@ -26,9 +36,12 @@ class Organisation(models.Model):
             "country": self.country.name,
             "state": self.state.name,
             "name": self.name,
-            "email": self.email,
-            "website": self.website,
-            "phone": self.phone,
+            "email": self.emails[0]["email"] if self.emails else None,
+            "emails": self.emails,
+            "website": self.websites[0]["url"] if self.websites else None,
+            "websites": self.websites,
+            "phone": self.phones[0]["phone"] if self.phones else None,
+            "phones": self.phones,
             "location": {
                 "address": self.address,
                 "lon": self.lon,
@@ -40,6 +53,54 @@ class Organisation(models.Model):
             "age_restriction": self.age_restriction,
         }
         return data
+
+class OrgContactManager(models.Manager):
+    def as_list(self):
+        return [obj.as_dict() for obj in self.all()]
+
+class OrgContact(models.Model):
+    organisation = models.ForeignKey("Organisation", on_delete=models.CASCADE)
+    label = models.CharField(max_length = 30)
+
+    objects = OrgContactManager()
+    def as_dict(self):
+        pass
+
+    class Meta:
+        abstract = True
+
+
+class OrgEmail(OrgContact):
+    label = models.CharField(max_length = 30, default="E-Mail")
+    email = models.EmailField()
+
+    def as_dict(self):
+        return {"label": self.label, "email": self.email}
+
+    class Meta:
+        verbose_name = "e-mail"
+
+class OrgPhone(OrgContact):
+    label = models.CharField(max_length = 30, default="Telefon")
+    phone = PhoneNumberField()
+
+    def as_dict(self):
+        return {"label": self.label, "phone": self.phone.as_international}
+
+    class Meta:
+        verbose_name = "phone"
+
+class OrgWebsite(OrgContact):
+    label = models.CharField(max_length = 30, default="Website")
+    url = models.URLField()
+
+    def as_dict(self):
+        return {"label": self.label, "url": self.url}
+
+    class Meta:
+        verbose_name = "website"
+
+
 
 class Country(models.Model):
     name = models.CharField(max_length = 50)
