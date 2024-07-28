@@ -85,7 +85,7 @@ class OrgPhone(OrgContact):
     phone = PhoneNumberField()
 
     def as_dict(self):
-        return {"label": self.label, "phone": self.phone.as_international}
+        return {"label": self.label, "phone": self.phone.as_international, "phone_rfc3966": self.phone.as_rfc3966}
 
     class Meta:
         verbose_name = "phone"
